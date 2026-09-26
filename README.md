@@ -1,18 +1,57 @@
 <img src="https://cdn.navid.media/connectors/google-search-console-icon.png" alt="Google Search Console" width="88">
 
-# Google Search Console MCP
+# Google Search Console MCP Server & CLI
 
-[![Stars](https://img.shields.io/github/stars/thenavidm/google-search-console-mcp?style=flat&logo=github&label=Stars)](https://github.com/thenavidm/google-search-console-mcp)
-[![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/thenavidm/google-search-console-mcp/blob/main/LICENSE)
+[![Stars](https://img.shields.io/github/stars/thenavidm/google-search-console-mcp-cli?style=flat&logo=github&label=Stars)](https://github.com/thenavidm/google-search-console-mcp-cli)
+[![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/thenavidm/google-search-console-mcp-cli/blob/main/LICENSE)
 [![YouTube](https://img.shields.io/badge/YouTube-@thenavidm-red?logo=youtube&logoColor=white)](https://youtube.com/@thenavidm?sub_confirmation=1)
 [![X](https://img.shields.io/badge/X-@thenavidm-black?logo=x)](https://x.com/thenavidm)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-thenavidm-0A66C2?logo=linkedin&logoColor=white)](https://linkedin.com/in/thenavidm)
 
+Google Search Console MCP server and CLI for Claude Code, Codex and AI agents. 19 tools for search analytics, URL inspection, sitemaps and property verification.
+
+One install gives you both surfaces, the same 19 tools under the same names, from the same server, so they cannot drift apart.
+
 Give any AI agent real access to what Google Search actually recorded about your sites. Queries, pages, impressions, rankings, indexing, sitemaps, from Claude Code, Claude Desktop, claude.ai, Cursor, Codex, or any MCP client.
 
-Built by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp&utm_content=readme).
+Built by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme).
 
 <img src="https://cdn.navid.media/repos/google-search-console-mcp.gif?v=2" alt="Claude Code using the Google Search Console MCP server" width="520">
+
+## Two ways to use it
+
+### Command line
+
+`google-search-console-cli` runs every tool as a command. Agents that run commands, like
+Claude Code, Codex and OpenCode, use it on their own, and you can type the same
+commands in a terminal, a script or a cron job:
+
+```bash
+google-search-console-cli                                   # every command, one line each
+google-search-console-cli list-sites                        # the exact property strings
+google-search-console-cli top-queries --site sc-domain:example.com --limit 10
+google-search-console-cli striking-distance --site sc-domain:example.com
+google-search-console-cli top-pages --site sc-domain:example.com --json --select rows.page,rows.clicks
+google-search-console-cli delete-sitemap --site sc-domain:example.com --sitemap-url https://example.com/old.xml --confirm
+google-search-console-cli <command> --help                  # what any command takes
+```
+
+`--confirm` is the shell spelling of the confirmation deleting a property or a sitemap needs. `--json` gives JSON, `--compact` puts it on one line, `--select` keeps only the fields you name, and `--agent` turns on all of it for a script. Exit codes are 0 ok, 2 usage or a refused write, 3 not found, 4 auth, 5 API, 7 rate limited and 10 nothing configured, so a script branches on the number.
+
+`google-search-console-cli schema <command>` prints the exact JSON Schema an MCP client
+receives for that tool.
+
+### MCP server, for AI agents
+
+`google-search-console-mcp` is what Claude Code, Claude Desktop, Cursor and the rest launch.
+You never run it by hand:
+
+```bash
+claude mcp add google-search-console -- npx -y @thenavidm/google-search-console-mcp-cli@latest
+```
+
+In Claude Desktop, the [`.mcpb` extension](https://github.com/thenavidm/google-search-console-mcp-cli/releases/latest)
+installs on a double click. Section 4 has every other client.
 
 ## Contents
 
@@ -50,16 +89,23 @@ The first one is the point. "What changed" is the question anyone actually has, 
 Node 20 or newer. Nothing else.
 
 ```bash
-npx -y @thenavidm/google-search-console-mcp@latest --version
+npx -y @thenavidm/google-search-console-mcp-cli@latest --version
 ```
 
 That is the whole install. `npx` fetches it on demand, so there is nothing to update later.
+
+For the CLI as a command you or your agent can run anywhere, install it once:
+
+```bash
+npm install -g @thenavidm/google-search-console-mcp-cli
+google-search-console-cli
+```
 
 ## 3. Setup 🔑
 
 You need a Google credential. Google does not hand out Search Console access without a Google Cloud project, so there is a real setup here: about five minutes, once.
 
-**[The full walkthrough is in INSTALL.md](https://github.com/thenavidm/google-search-console-mcp/blob/main/INSTALL.md).** Every click, both routes, and what each error means.
+**[The full walkthrough is in INSTALL.md](https://github.com/thenavidm/google-search-console-mcp-cli/blob/main/INSTALL.md).** Every click, both routes, and what each error means.
 
 ### Have an agent do it
 
@@ -68,9 +114,9 @@ The agent cannot sign in to Google for you. Only you can. What it can do is walk
 Paste this into Claude Code, Cursor, or any agent with terminal access:
 
 ```
-Set up @thenavidm/google-search-console-mcp for me.
+Set up @thenavidm/google-search-console-mcp-cli for me.
 
-1. Read https://github.com/thenavidm/google-search-console-mcp/blob/main/INSTALL.md
+1. Read https://github.com/thenavidm/google-search-console-mcp-cli/blob/main/INSTALL.md
 2. Walk me through the Google Cloud steps one at a time. Stop and wait
    for me after each one. Do not skip the part about publishing the
    OAuth app: it is why these break after a week.
@@ -83,7 +129,7 @@ Set up @thenavidm/google-search-console-mcp for me.
 
 While your OAuth app's publishing status is **Testing**, Google issues refresh tokens that expire after **7 days**. Everything works, and then a week later it stops for no visible reason.
 
-Click **Publish app** on the **Audience** page during setup. The [setup guide](https://github.com/thenavidm/google-search-console-mcp/blob/main/INSTALL.md) covers where that is and why the verification warning does not apply to you.
+Click **Publish app** on the **Audience** page during setup. The [setup guide](https://github.com/thenavidm/google-search-console-mcp-cli/blob/main/INSTALL.md) covers where that is and why the verification warning does not apply to you.
 
 ### Signing in
 
@@ -91,12 +137,12 @@ Click **Publish app** on the **Audience** page during setup. The [setup guide](h
 export GSC_CLIENT_ID="...apps.googleusercontent.com"
 export GSC_CLIENT_SECRET="GOCSPX-..."
 
-npx -y @thenavidm/google-search-console-mcp@latest login
+npx -y @thenavidm/google-search-console-mcp-cli@latest login
 ```
 
 A browser opens, you pick your Google account, and the refresh token is saved to `~/.google-search-console-mcp/tokens.json`.
 
-For a server or CI with no browser, use a service account instead. Both routes are in the [setup guide](https://github.com/thenavidm/google-search-console-mcp/blob/main/INSTALL.md).
+For a server or CI with no browser, use a service account instead. Both routes are in the [setup guide](https://github.com/thenavidm/google-search-console-mcp-cli/blob/main/INSTALL.md).
 
 ## 4. Connect your client 🔌
 
@@ -106,12 +152,18 @@ For a server or CI with no browser, use a service account instead. Both routes a
 claude mcp add google-search-console \
   -e GSC_CLIENT_ID=your-client-id \
   -e GSC_CLIENT_SECRET=your-client-secret \
-  -- npx -y @thenavidm/google-search-console-mcp@latest
+  -- npx -y @thenavidm/google-search-console-mcp-cli@latest
 ```
 
 Add `--scope user` to make it available in every project rather than just this one.
 
 ### Claude Desktop
+
+The short way: download the [`.mcpb` extension](https://github.com/thenavidm/google-search-console-mcp-cli/releases/latest)
+from the latest release and double-click it. It carries its own dependencies,
+so there is no config file to edit and nothing to install first. Sign in once with `npx -y @thenavidm/google-search-console-mcp-cli login` first, or pick a service account key when Claude Desktop asks.
+
+The long way, if you would rather edit the config yourself:
 
 | Platform | Config file |
 |---|---|
@@ -123,7 +175,7 @@ Add `--scope user` to make it available in every project rather than just this o
   "mcpServers": {
     "google-search-console": {
       "command": "npx",
-      "args": ["-y", "@thenavidm/google-search-console-mcp@latest"],
+      "args": ["-y", "@thenavidm/google-search-console-mcp-cli@latest"],
       "env": {
         "GSC_CLIENT_ID": "your-client-id",
         "GSC_CLIENT_SECRET": "your-client-secret"
@@ -156,7 +208,7 @@ Quit Claude Desktop completely and reopen it. Closing the window is not enough.
     "google-search-console": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@thenavidm/google-search-console-mcp@latest"],
+      "args": ["-y", "@thenavidm/google-search-console-mcp-cli@latest"],
       "env": {
         "GSC_CLIENT_ID": "your-client-id",
         "GSC_CLIENT_SECRET": "your-client-secret"
@@ -173,7 +225,7 @@ Quit Claude Desktop completely and reopen it. Closing the window is not enough.
 ```toml
 [mcp_servers.google-search-console]
 command = "npx"
-args = ["-y", "@thenavidm/google-search-console-mcp@latest"]
+args = ["-y", "@thenavidm/google-search-console-mcp-cli@latest"]
 
 [mcp_servers.google-search-console.env]
 GSC_CLIENT_ID = "your-client-id"
@@ -188,10 +240,12 @@ GSC_CLIENT_SECRET = "your-client-secret"
 
 Any stdio MCP client needs the same three things: the command `npx`, the args array, and the env block.
 
+**To disconnect,** remove the entry from your MCP client's config, then run `logout your@email.com` to delete the local token. Then revoke Google's side at [myaccount.google.com/permissions](https://myaccount.google.com/permissions). That is the half that matters: deleting the local file leaves a live grant behind.
+
 ## 5. Check it worked 🩺
 
 ```bash
-npx -y @thenavidm/google-search-console-mcp@latest doctor
+npx -y @thenavidm/google-search-console-mcp-cli@latest doctor
 ```
 
 It reports the Node version, which credential is in use, whether a token can actually be minted, how many properties that account reaches, whether verification is available, and which safety switches are on.
@@ -321,14 +375,14 @@ Search Console data is read on demand and never cached to disk.
 claude.ai runs connectors from Anthropic's cloud, not from your machine, so it cannot start a local command. It needs a public HTTPS URL, which means the HTTP transport.
 
 ```bash
-npx -y @thenavidm/google-search-console-mcp@latest --http --port 8000
+npx -y @thenavidm/google-search-console-mcp-cli@latest --http --port 8000
 ```
 
 That binds `127.0.0.1`. To bind anything else you must set `GSC_HTTP_TOKEN`, and the server refuses to start without it:
 
 ```bash
 export GSC_HTTP_TOKEN="$(openssl rand -hex 32)"
-npx -y @thenavidm/google-search-console-mcp@latest --http --host 0.0.0.0 --port 8000
+npx -y @thenavidm/google-search-console-mcp-cli@latest --http --host 0.0.0.0 --port 8000
 ```
 
 The refusal is deliberate. Whatever can reach that port can read your site's entire search history and delete its properties.
@@ -339,7 +393,7 @@ There is a `Dockerfile` if you would rather run it that way.
 
 ## 11. Troubleshooting 🔧
 
-Start with `doctor`. It checks each failure mode separately and names the fix.
+Start with `doctor`. It checks each failure mode separately and names the fix. Access tokens last an hour and refresh on their own, so an expired token is never the problem by itself.
 
 | What you see | What it is |
 |---|---|
@@ -365,6 +419,20 @@ Without one, an assistant asked about your search traffic can only tell you how 
 </details>
 
 <details>
+<summary><b>What is the CLI?</b></summary>
+
+`google-search-console-cli` is the same program as the MCP server, run as commands. AI agents that run commands, like Claude Code, Codex and OpenCode, use it on their own, and you can type the same commands in a terminal, a script or a cron job. Every tool is a command with dashes, so `top_queries` runs as `google-search-console-cli top-queries`.
+
+</details>
+
+<details>
+<summary><b>Should I use the MCP server or the CLI?</b></summary>
+
+Use the MCP server in an app with no terminal, like Claude Desktop's chat. Use the CLI anywhere commands run: an agent like Claude Code, Codex or OpenCode, a script or a cron job. The MCP server sends its full tool list to the model on every turn, and the CLI costs nothing until it runs.
+
+</details>
+
+<details>
 <summary><b>What is Google Search Console?</b></summary>
 
 Google Search Console is Google's free tool for site owners. It shows what people searched before they landed on your site, which pages Google shows and where they rank, which pages Google has and has not indexed, and what it thinks is broken.
@@ -376,7 +444,7 @@ It is the only place Google tells you any of this. Analytics tells you what peop
 <details>
 <summary><b>Do I need to be technical to use this?</b></summary>
 
-You need to be comfortable pasting commands into a terminal and clicking through a few pages in Google Cloud. The [setup guide](https://github.com/thenavidm/google-search-console-mcp/blob/main/INSTALL.md) covers every click, and the prompt in section 3 hands the whole thing to an agent that walks you through it one step at a time.
+You need to be comfortable pasting commands into a terminal and clicking through a few pages in Google Cloud. The [setup guide](https://github.com/thenavidm/google-search-console-mcp-cli/blob/main/INSTALL.md) covers every click, and the prompt in section 3 hands the whole thing to an agent that walks you through it one step at a time.
 
 The Google Cloud part is the hard bit, and it is a one-time five minutes.
 
@@ -441,24 +509,6 @@ Useful when your own sites and a client's sit under different Google logins.
 </details>
 
 <details>
-<summary><b>What happens when my token expires?</b></summary>
-
-Access tokens last an hour and are refreshed automatically. You should never notice.
-
-The exception is the one worth knowing: while your OAuth app's publishing status is **Testing**, Google expires the refresh token after 7 days, and everything stops. Publishing the app fixes it permanently. Section 3 covers it.
-
-</details>
-
-<details>
-<summary><b>How do I disconnect it?</b></summary>
-
-Remove the entry from your MCP client's config, then run `logout your@email.com` to delete the local token.
-
-Then revoke Google's side at [myaccount.google.com/permissions](https://myaccount.google.com/permissions). That is the half that matters: deleting the local file leaves a live grant behind.
-
-</details>
-
-<details>
 <summary><b>Why can it not tell Google to index a page?</b></summary>
 
 Google offers no such endpoint. "Request indexing" exists in the Search Console UI and has no API behind it, and the Indexing API that does exist only accepts job postings and livestreams.
@@ -469,7 +519,7 @@ Resubmitting a sitemap is the only recrawl signal available programmatically, wh
 
 ## Questions
 
-Run into a problem or have a question? [Open an issue](https://github.com/thenavidm/google-search-console-mcp/issues) and I will help.
+Run into a problem or have a question? [Open an issue](https://github.com/thenavidm/google-search-console-mcp-cli/issues) and I will help.
 
 ## About the author
 
@@ -477,9 +527,9 @@ Navid Moazzez is a leading AI business strategist and the host of the AI Creator
 
 **Links**
 
-- Personal website: [navid.me](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp&utm_content=readme)
-- Link in bio: [navid.bio](https://navid.bio?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp&utm_content=readme)
-- Navid Media: [navid.media](https://navid.media?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp&utm_content=readme)
+- Personal website: [navid.me](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme)
+- Link in bio: [navid.bio](https://navid.bio?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme)
+- Navid Media: [navid.media](https://navid.media?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme)
 - YouTube: [@thenavidm](https://youtube.com/@thenavidm?sub_confirmation=1) and [@thenavidai](https://youtube.com/@thenavidai?sub_confirmation=1)
 - X: [@thenavidm](https://x.com/thenavidm)
 - Instagram: [@thenavidm](https://instagram.com/thenavidm)
@@ -497,10 +547,10 @@ If this is useful, star the repo and come say hi on [X](https://x.com/thenavidm)
 
 ## License
 
-MIT. See [LICENSE](https://github.com/thenavidm/google-search-console-mcp/blob/main/LICENSE).
+MIT. See [LICENSE](https://github.com/thenavidm/google-search-console-mcp-cli/blob/main/LICENSE).
 
 Not affiliated with, endorsed by, or sponsored by Google. Google, Google Search Console and Google Cloud are trademarks of Google LLC.
 
 ---
 
-© 2026 [NM Media](https://navid.media?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp&utm_content=readme). Made with ❤️ by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp&utm_content=readme).
+© 2026 [NM Media](https://navid.media?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme). Made with ❤️ by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme).

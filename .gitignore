@@ -7,3 +7,5 @@ tokens.json
 *.jsonl
 service-account*.json
 .DS_Store
+desktop-extension/build/
+desktop-extension/*.mcpb

@@ -222,7 +222,7 @@ export async function resolveToken(cfg: Config, wanted?: string | null): Promise
       return { token: t.token, source: "service_account", account: t.email }
     }
     throw new AuthError(
-      "Not signed in. Run `npx -y @thenavidm/google-search-console-mcp@latest login` on this machine, or set GSC_SERVICE_ACCOUNT_KEY.",
+      "Not signed in. Run `npx -y @thenavidm/google-search-console-mcp-cli@latest login` on this machine, or set GSC_SERVICE_ACCOUNT_KEY.",
     )
   }
 
@@ -275,7 +275,7 @@ export async function forgetAccount(email: string): Promise<boolean> {
 export async function login(cfg: Config, opts: { port?: number } = {}): Promise<StoredAccount> {
   if (!cfg.clientId || !cfg.clientSecret) {
     throw new AuthError(
-      "Set GSC_CLIENT_ID and GSC_CLIENT_SECRET first. Both come from a Desktop OAuth client in Google Cloud, and the setup guide walks through creating one: https://github.com/thenavidm/google-search-console-mcp/blob/main/references/setup.md",
+      "Set GSC_CLIENT_ID and GSC_CLIENT_SECRET first. Both come from a Desktop OAuth client in Google Cloud, and the setup guide walks through creating one: https://github.com/thenavidm/google-search-console-mcp-cli/blob/main/references/setup.md",
     )
   }
 

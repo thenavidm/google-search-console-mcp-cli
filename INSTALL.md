@@ -91,7 +91,7 @@ retrievable later from the same page, so losing it is not fatal.
 export GSC_CLIENT_ID="...apps.googleusercontent.com"
 export GSC_CLIENT_SECRET="GOCSPX-..."
 
-npx -y @thenavidm/google-search-console-mcp@latest login
+npx -y @thenavidm/google-search-console-mcp-cli@latest login
 ```
 
 A browser opens. Pick the Google account that owns your Search Console
@@ -103,7 +103,7 @@ readable only by you. Nothing is sent anywhere else.
 ### 7. Check it
 
 ```bash
-npx -y @thenavidm/google-search-console-mcp@latest doctor
+npx -y @thenavidm/google-search-console-mcp-cli@latest doctor
 ```
 
 It names which account it is using and how many properties that account can
@@ -150,7 +150,7 @@ all of them at once.
 
 ```bash
 export GSC_SERVICE_ACCOUNT_KEY=/secure/path/gsc-key.json
-npx -y @thenavidm/google-search-console-mcp@latest doctor
+npx -y @thenavidm/google-search-console-mcp-cli@latest doctor
 ```
 
 If you would rather not put a file on disk, base64 the key and pass it inline:

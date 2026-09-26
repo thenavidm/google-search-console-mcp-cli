@@ -1,10 +1,11 @@
 {
-  "name": "@thenavidm/google-search-console-mcp",
-  "version": "0.1.0",
-  "description": "Google Search Console MCP server for Claude Code and AI agents. Search analytics, URL inspection, sitemaps and property verification, over the Search Console API.",
+  "name": "@thenavidm/google-search-console-mcp-cli",
+  "version": "0.2.0",
+  "description": "Google Search Console MCP server and CLI for Claude Code, Codex and AI agents. 19 tools for search analytics, URL inspection, sitemaps and property verification.",
   "type": "module",
   "bin": {
-    "google-search-console-mcp": "dist/index.js"
+    "google-search-console-mcp": "dist/index.js",
+    "google-search-console-cli": "dist/index.js"
   },
   "main": "./dist/index.js",
   "files": [
@@ -33,7 +34,9 @@
     "seo",
     "claude",
     "claude-code",
-    "ai-agents"
+    "ai-agents",
+    "cli",
+    "command-line-tool"
   ],
   "author": {
     "name": "Navid Moazzez",
@@ -42,9 +45,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thenavidm/google-search-console-mcp.git"
+    "url": "git+https://github.com/thenavidm/google-search-console-mcp-cli.git"
   },
-  "homepage": "https://github.com/thenavidm/google-search-console-mcp",
+  "homepage": "https://github.com/thenavidm/google-search-console-mcp-cli",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
     "express": "^5.1.0",

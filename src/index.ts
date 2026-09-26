@@ -7,6 +7,7 @@ import { loadConfig } from "./config.js"
 import { forgetAccount, listStoredAccounts, login } from "./auth.js"
 import { doctor } from "./doctor.js"
 import { VERSION } from "./server.js"
+import { isCliCommand, runCli, toolNames } from "./cli.js"
 
 const HELP = `google-search-console-mcp ${VERSION}
 
@@ -17,6 +18,8 @@ const HELP = `google-search-console-mcp ${VERSION}
   google-search-console-mcp accounts         list signed-in accounts
   google-search-console-mcp doctor           check what is actually configured
   google-search-console-mcp --version
+  google-search-console-cli                  every tool as a shell command
+  google-search-console-cli <command> --help what one command takes
 
 Credentials, in the order they are tried:
 
@@ -32,7 +35,7 @@ Switches:
   GSC_AUDIT_LOG=<path>        one JSON line per attempted write
   GSC_HTTP_TOKEN=<secret>     required to bind anything but loopback over HTTP
 
-Setup guide: https://github.com/thenavidm/google-search-console-mcp/blob/main/references/setup.md
+Setup guide: https://github.com/thenavidm/google-search-console-mcp-cli/blob/main/references/setup.md
 `
 
 function flagValue(argv: string[], name: string): string | undefined {
@@ -41,9 +44,29 @@ function flagValue(argv: string[], name: string): string | undefined {
   return argv[i + 1]
 }
 
+/** Invoked as the CLI binary rather than the server one. */
+function invokedAsCli(): boolean {
+  const name = (process.argv[1] ?? "").split("/").pop() ?? ""
+  return name.startsWith("google-search-console-cli")
+}
+
+/** What the entry point answers itself, whichever binary was typed. */
+const ENTRY_COMMANDS = new Set(["help", "version", "doctor", "login", "logout", "accounts"])
+
 async function main(): Promise<void> {
   const argv = process.argv.slice(2)
   const command = argv[0]
+
+  // The CLI: every tool as a command, from the same server an MCP app talks to.
+  // Checked first so `<tool> --help` reaches the tool, not the entry point.
+  const cli =
+    command !== undefined && !command.startsWith("-") && !ENTRY_COMMANDS.has(command)
+      ? invokedAsCli() || isCliCommand(argv, await toolNames())
+      : invokedAsCli() && argv.length === 0
+  if (cli) {
+    process.exitCode = await runCli(argv.length ? argv : ["tools"])
+    return
+  }
 
   if (argv.includes("--help") || argv.includes("-h") || command === "help") {
     process.stdout.write(HELP)

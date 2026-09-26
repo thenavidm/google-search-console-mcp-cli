@@ -1,0 +1,67 @@
+{
+  "manifest_version": "0.2",
+  "name": "google-search-console",
+  "display_name": "Google Search Console",
+  "version": "0.2.0",
+  "description": "Google Search Console MCP server and CLI for Claude Code, Codex and AI agents. 19 tools for search analytics, URL inspection, sitemaps and property verification.",
+  "long_description": "Connects Claude to Google Search Console: the queries, pages, impressions, rankings, indexing and sitemaps Google recorded for your sites.\n\nSign in once from a terminal with `npx -y @thenavidm/google-search-console-mcp-cli login`, and the extension uses that account from then on. Or point it at a Google service account key file that has been added to your properties.\n\nDeleting a property or a sitemap refuses to run without an explicit confirmation. Turn Read only on to remove every write from the tool list.",
+  "author": {
+    "name": "Navid Moazzez",
+    "url": "https://navid.me"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thenavidm/google-search-console-mcp-cli"
+  },
+  "homepage": "https://github.com/thenavidm/google-search-console-mcp-cli",
+  "documentation": "https://github.com/thenavidm/google-search-console-mcp-cli#readme",
+  "support": "https://github.com/thenavidm/google-search-console-mcp-cli/issues",
+  "license": "MIT",
+  "keywords": [
+    "google-search-console",
+    "seo",
+    "search-analytics",
+    "sitemaps",
+    "mcp"
+  ],
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {
+        "GSC_SERVICE_ACCOUNT_KEY": "${user_config.service_account_key}",
+        "GSC_READ_ONLY": "${user_config.read_only}"
+      }
+    }
+  },
+  "user_config": {
+    "service_account_key": {
+      "type": "file",
+      "title": "Service account key (optional)",
+      "description": "A Google service account JSON key that has been added to your Search Console properties. Leave empty if you signed in with the login command.",
+      "required": false
+    },
+    "read_only": {
+      "type": "boolean",
+      "title": "Read only",
+      "description": "Hide every tool that can add, verify or delete a property or a sitemap.",
+      "default": false,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=20"
+    }
+  }
+}
