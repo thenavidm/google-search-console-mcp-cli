@@ -9,6 +9,12 @@
 | Google Site Verification API | v1 | 2026-09-01 |
 | Node | >= 20 | |
 
+## 0.2.1
+
+**A refusal says `--confirm` in a terminal.** The server words it for an AI, as `confirm: true`, and the CLI now rewrites that one phrase, so the command it asks for is the one you type. The command list only mentions `--confirm` where a tool takes it.
+
+**The README shows the context cost measured in Claude Code**: every tool loaded, Claude Code's default tool search, and the CLI's `SKILL.md`, each from 2 real runs.
+
 ## 0.2.0
 
 **A CLI.** `google-search-console-cli` runs every tool as a shell command. It builds the same server the MCP binary runs and calls it through the SDK's in-memory transport, so the flags, the validation and the write guard are the ones an MCP app gets, and the two surfaces cannot drift. Agents that run commands, like Claude Code and Codex, use it without paying for the tool list on every turn. Exit codes follow the house contract: 2 usage or a refused write, 3 not found, 4 auth, 5 API, 7 rate limited, 10 nothing configured.

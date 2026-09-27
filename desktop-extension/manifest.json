@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "google-search-console",
   "display_name": "Google Search Console",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Google Search Console MCP server and CLI for Claude Code, Codex and AI agents. 19 tools for search analytics, URL inspection, sitemaps and property verification.",
   "long_description": "Connects Claude to Google Search Console: the queries, pages, impressions, rankings, indexing and sitemaps Google recorded for your sites.\n\nSign in once from a terminal with `npx -y @thenavidm/google-search-console-mcp-cli login`, and the extension uses that account from then on. Or point it at a Google service account key file that has been added to your properties.\n\nDeleting a property or a sitemap refuses to run without an explicit confirmation. Turn Read only on to remove every write from the tool list.",
   "author": {

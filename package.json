@@ -1,6 +1,6 @@
 {
   "name": "@thenavidm/google-search-console-mcp-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Google Search Console MCP server and CLI for Claude Code, Codex and AI agents. 19 tools for search analytics, URL inspection, sitemaps and property verification.",
   "type": "module",
   "bin": {
