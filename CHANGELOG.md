@@ -9,6 +9,10 @@
 | Google Site Verification API | v1 | 2026-09-01 |
 | Node | >= 20 | |
 
+## 0.2.2, 2026-10-04
+
+- **`npx -y @thenavidm/google-search-console-mcp-cli` always starts the MCP server.** npx starts whichever binary the npm registry lists first when they share one file, and the registry does not keep the published order, so an MCP client set up with this README's install line could get `google-search-console-cli` and its command list instead of a server. A third binary named after the package now always starts the server, and npx picks it by name.
+
 ## 0.2.1
 
 **A refusal says `--confirm` in a terminal.** The server words it for an AI, as `confirm: true`, and the CLI now rewrites that one phrase, so the command it asks for is the one you type. The command list only mentions `--confirm` where a tool takes it.

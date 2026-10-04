@@ -3,7 +3,7 @@ import { loadConfig, type Config } from "./config.js"
 import { makeContext } from "./tools/shared.js"
 import { registerAllTools } from "./tools/index.js"
 
-export const VERSION = "0.2.1"
+export const VERSION = "0.2.2"
 
 /**
  * Instructions reach the model before the first tool result does, which is the
