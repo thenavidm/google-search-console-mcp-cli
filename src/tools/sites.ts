@@ -1,15 +1,13 @@
-import { z } from "zod"
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { request, normalizeSite, seg, WMX_BASE } from "../api/client.js"
 import { listStoredAccounts, resolveToken } from "../auth.js"
-import { ACCOUNT, SITE, tool, type ToolContext } from "./shared.js"
+import { ACCOUNT, SITE, tool, type ToolContext, type ToolRegistrar } from "./shared.js"
 
 interface SiteEntry {
   siteUrl: string
   permissionLevel: string
 }
 
-export function registerSiteTools(server: McpServer, ctx: ToolContext): void {
+export function registerSiteTools(server: ToolRegistrar, ctx: ToolContext): void {
   tool(server, ctx, {
     name: "list_accounts",
     kind: "read",
@@ -79,14 +77,9 @@ export function registerSiteTools(server: McpServer, ctx: ToolContext): void {
       "Remove a property from this Google account's Search Console. The site's history is no longer readable by this account until the property is re-added and re-verified, and Google does not offer an undo. Set confirm to true to proceed.",
     schema: {
       site: SITE,
-      confirm: z
-        .boolean()
-        .default(false)
-        .describe("Removing a property cuts this account off from its search history until it is re-added and re-verified. Set true to proceed."),
       account: ACCOUNT,
     },
-    run: async ({ site, confirm }, token) => {
-      if (!confirm) throw new Error("Not deleting. Confirm which property this removes, then call again with confirm: true.")
+    run: async ({ site }, token) => {
       const target = normalizeSite(site)
       await request(token, `${WMX_BASE}/sites/${seg(target)}`, { method: "DELETE" })
       return { deleted: target }

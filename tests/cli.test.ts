@@ -1,101 +1,122 @@
 /**
- * The CLI bridge (src/cli.ts, copied from dev:mcp-cli assets/cli-bridge.ts).
+ * The CLI, now built by Slipway from the same tools as the MCP server.
  *
- * The bridge reads the real server's tools/list, so the tests that count are
- * the ones over that list: every tool routes, every schema turns into flags,
- * and every required key is a required flag. The rest cover the argv shapes a
- * person types and the exit-code contract.
+ * Parsing, help and output shapes are Slipway's and tested there. These cover
+ * what this repo promises: every tool is a command, a task is found by what it
+ * does, Google's failures keep the exit codes scripts branch on, the sign-in
+ * commands still answer, and the docs stay in step with the code.
  */
 
-import { describe, expect, it } from "vitest";
-import { EXIT, exitCodeFor, flagsFor, isCliCommand, listTools, parseArgs } from "../src/cli.js";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { checkApp, cli } from "@thenavidm/slipway/testing"
+import { app } from "../src/app.js"
+import { TOOLS } from "../src/tools/index.js"
+import { errorResponse, fakeFetch } from "./helpers.js"
 
-const schema = {
-  type: "object",
-  properties: {
-    text: { type: "string", description: "The body." },
-    limit: { type: "integer" },
-    confirm: { type: "boolean" },
-    tags: { type: "array", items: { type: "string" } },
-    filter: { type: "object" },
-    mode: { type: "string", enum: ["fast", "slow"] },
-    maybe: { anyOf: [{ type: "number" }, { type: "null" }] },
-  },
-  required: ["text"],
-};
+const env = { GSC_ACCESS_TOKEN: "fake" }
+let store = ""
 
-describe("flags from the JSON Schema an MCP app receives", () => {
-  const flags = flagsFor(schema);
-  const by = (key: string) => flags.find((f) => f.key === key);
+beforeEach(() => {
+  store = join(mkdtempSync(join(tmpdir(), "gsc-")), "tokens.json")
+  vi.stubEnv("GSC_TOKEN_STORE", store)
+})
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+})
 
-  it("kebab-cases each key and carries its description", () => {
-    expect(by("text")).toMatchObject({ flag: "--text", kind: "string", required: true, help: "The body." });
-  });
+describe("Search Console CLI on Slipway", () => {
+  it("makes all 19 tools commands, the two deletes needing confirmation", async () => {
+    const context = JSON.parse((await cli(app, ["agent-context", "--brief"], { env: {} })).stdout)
+    const commands = context.commands as Array<{ command: string; requires_confirm?: boolean }>
+    expect(commands.map((c) => c.command)).toEqual(TOOLS.map((tool) => tool.name.replace(/_/g, "-")))
+    expect(commands.filter((c) => c.requires_confirm).map((c) => c.command).sort()).toEqual(["delete-site", "delete-sitemap"])
+  })
 
-  it("reads the kind of every property", () => {
-    expect(by("limit")?.kind).toBe("integer");
-    expect(by("confirm")?.kind).toBe("boolean");
-    expect(by("tags")).toMatchObject({ kind: "string", repeatable: true });
-    expect(by("filter")?.kind).toBe("json");
-    expect(by("mode")).toMatchObject({ kind: "enum", choices: ["fast", "slow"] });
-    expect(by("maybe")?.kind).toBe("number");
-  });
-});
+  it("finds the command for a task described in words", async () => {
+    const first = async (...words: string[]) => (await cli(app, ["which", ...words], { env: {} })).stdout.split("\n")[0]
+    expect(await first("submit", "a", "sitemap")).toContain("submit-sitemap")
+    expect(await first("queries", "between", "positions", "5", "and", "20")).toContain("striking-distance")
+  })
 
-describe("parseArgs", () => {
-  const flags = flagsFor(schema);
+  it("reports a missing argument by its flag", async () => {
+    const run = await cli(app, ["get-site", "--agent"], { env })
+    expect(run.code).toBe(2)
+    expect(JSON.parse(run.stderr).error).toContain("--site")
+  })
 
-  it("accepts --flag value, --flag=value and the underscore spelling", () => {
-    expect(parseArgs(["--text", "hi"], flags)).toEqual({ text: "hi" });
-    expect(parseArgs(["--text=hi"], flags)).toEqual({ text: "hi" });
-    expect(parseArgs(["--text", "hi", "--mode", "fast"], flags)).toEqual({ text: "hi", mode: "fast" });
-  });
-
-  it("treats a boolean as a switch and collects a repeatable flag", () => {
-    expect(parseArgs(["--text", "hi", "--confirm", "--tags", "a", "--tags", "b"], flags)).toEqual({ text: "hi", confirm: true, tags: ["a", "b"] });
-  });
-
-  it("fills the first required flag from a bare argument", () => {
-    expect(parseArgs(["hello"], flags)).toEqual({ text: "hello" });
-  });
-
-  it("refuses what it cannot use", () => {
-    expect(() => parseArgs(["--nope", "x"], flags)).toThrow(/Unknown option/);
-    expect(() => parseArgs(["--text", "hi", "--limit", "1.5"], flags)).toThrow(/whole number/);
-    expect(() => parseArgs(["--text", "hi", "--mode", "medium"], flags)).toThrow(/one of/);
-    expect(() => parseArgs(["--text", "hi", "--filter", "{oops"], flags)).toThrow(/JSON/);
-    expect(() => parseArgs([], flags)).toThrow(/Missing --text/);
-  });
-});
-
-describe("exit codes follow the house contract", () => {
-  it("maps the generic words", () => {
-    expect(exitCodeFor("MCP error -32602: Input validation error: Invalid arguments")).toBe(EXIT.usage);
-    expect(exitCodeFor("Not deleting. Call again with confirm: true once you are sure.")).toBe(EXIT.usage);
-    expect(exitCodeFor("Too many requests, slow down (429)")).toBe(EXIT.rateLimited);
-    expect(exitCodeFor("Nothing is configured. Run `login` first.")).toBe(EXIT.config);
-    expect(exitCodeFor("Request had invalid authentication credentials (401)")).toBe(EXIT.auth);
-    expect(exitCodeFor("That resource was not found (404)")).toBe(EXIT.notFound);
-    expect(exitCodeFor("Upstream answered 502")).toBe(EXIT.api);
-  });
-});
-
-describe("parity with the real server", () => {
-  it("routes every tool in both spellings, and builds flags for every schema", async () => {
-    const tools = await listTools();
-    expect(tools.length).toBeGreaterThan(0);
-    const names = tools.map((t) => t.name);
-    for (const tool of tools) {
-      expect(isCliCommand([tool.name], names)).toBe(true);
-      expect(isCliCommand([tool.name.replace(/_/g, "-")], names)).toBe(true);
-      const flags = flagsFor(tool.inputSchema);
-      expect(flags).toHaveLength(Object.keys(tool.inputSchema.properties ?? {}).length);
-      for (const key of tool.inputSchema.required ?? []) expect(flags.find((f) => f.key === key)?.required).toBe(true);
+  it("keeps the exit codes scripts branch on", async () => {
+    // 0.2 gave 5 for 400 and 422; Google's status now says the request was the caller's to fix.
+    for (const [status, code] of [[400, 2], [401, 4], [403, 4], [404, 3], [429, 7], [500, 5]] as const) {
+      vi.stubGlobal("fetch", fakeFetch({ "/sites/": errorResponse(status, `Google answered ${status}.`) }).impl)
+      const run = await cli(app, ["get-site", "--site", "sc-domain:example.com", "--agent"], { env })
+      expect(run.code, `HTTP ${status}`).toBe(code)
+      expect(JSON.parse(run.stderr).status, `HTTP ${status}`).toBe(status)
     }
-  });
+  })
 
-  it("leaves the server's own flags alone", () => {
-    expect(isCliCommand(["--http"], ["x"])).toBe(false);
-    expect(isCliCommand([], ["x"])).toBe(false);
-  });
-});
+  it("exits 10 when nothing is signed in, saying how to sign in", async () => {
+    const run = await cli(app, ["list-sites", "--agent"], { env: {} })
+    expect(run.code).toBe(10)
+    expect(JSON.parse(run.stderr).error).toMatch(/Not signed in/)
+  })
+
+  it("lists and forgets stored sign-ins with accounts and logout", async () => {
+    writeFileSync(store, JSON.stringify({ default: "a@example.com", accounts: [{ email: "a@example.com", scopes: [] }, { email: "b@example.com", scopes: [] }] }))
+    expect((await cli(app, ["accounts"], { env: {} })).stdout).toBe("a@example.com  (default)\nb@example.com\n")
+    const out = await cli(app, ["logout", "b@example.com"], { env: {} })
+    expect(out.code).toBe(0)
+    expect(out.stdout).toContain("Forgot b@example.com.")
+    expect((await cli(app, ["accounts"], { env: {} })).stdout).toBe("a@example.com  (default)\n")
+    expect((await cli(app, ["logout"], { env: {} })).code).toBe(2)
+  })
+
+  it("passes slipway check", async () => {
+    const report = await checkApp(app, { env: {} })
+    expect(report.findings.filter((finding) => finding.level === "error")).toEqual([])
+  })
+})
+
+describe("documentation stays in step with the code", () => {
+  const read = (p: string): string => readFileSync(new URL(p, import.meta.url), "utf-8")
+  const names = (text: string): Set<string> => new Set((text.match(/GSC_[A-Z_]+/g) ?? []).filter((name) => !name.endsWith("_")))
+  const source = (dir: string): string =>
+    readdirSync(new URL(dir, import.meta.url), { withFileTypes: true })
+      .map((entry) => (entry.isDirectory() ? source(`${dir}${entry.name}/`) : entry.name.endsWith(".ts") ? read(`${dir}${entry.name}`) : ""))
+      .join("\n")
+
+  /** Every variable the server reads: this repo's code, and Slipway's as agent-context lists them. */
+  const used = async (): Promise<Set<string>> => {
+    const context = JSON.parse((await cli(app, ["agent-context"], { env: {} })).stdout)
+    return new Set([...names(source("../src/")), ...context.settings.map((setting: { env: string }) => setting.env)])
+  }
+
+  it("documents every environment variable the code reads", async () => {
+    const documented = names(read("../README.md"))
+    expect([...(await used())].filter((v) => !documented.has(v))).toEqual([])
+  })
+
+  it("names every environment variable in --help or agent-context", async () => {
+    const help = (await cli(app, ["--help"], { env: {} })).stdout
+    const context = JSON.parse((await cli(app, ["agent-context"], { env: {} })).stdout)
+    const described = new Set(context.settings.map((setting: { env: string }) => setting.env))
+    expect([...(await used())].filter((v) => !help.includes(v) && !described.has(v))).toEqual([])
+  })
+
+  it.each(["../README.md", "../INSTALL.md"])("has no dead in-page anchors in %s", (file) => {
+    if (!existsSync(new URL(file, import.meta.url))) return
+    const md = read(file).replace(/```[\s\S]*?```/g, "")
+    // GitHub's slug keeps letters, marks, numbers and connector punctuation, so an
+    // emoji's variation selector (U+FE0F) stays in the anchor and a link has to carry it.
+    const slugs = new Set(
+      [...md.matchAll(/^#{1,6} (.+)$/gm)].map(([, heading]) =>
+        (heading as string).trim().toLowerCase().replace(/[^\p{L}\p{M}\p{N}\p{Pc}\s-]/gu, "").replace(/ /g, "-"),
+      ),
+    )
+    const dead = [...md.matchAll(/\[[^\]]+\]\(#([^)]+)\)/g)].map((m) => decodeURIComponent(m[1] as string)).filter((a) => !slugs.has(a))
+    expect(dead).toEqual([])
+  })
+})

@@ -23,12 +23,6 @@ export function expandHome(p: string): string {
 }
 
 export interface Config {
-  /** Remove every write tool from the list rather than erroring when called. */
-  readOnly: boolean
-  /** Keep reversible writes, drop the irreversible ones. */
-  allowDestructive: boolean
-  /** One JSON line per attempted write, allowed and blocked alike. */
-  auditLog: string | null
   /** OAuth client, needed for `login` and for refreshing a cached token. */
   clientId: string | null
   clientSecret: string | null
@@ -39,30 +33,18 @@ export interface Config {
   staticAccessToken: string | null
 }
 
-function envFlag(name: string): boolean {
-  const v = process.env[name]?.trim().toLowerCase()
-  return v === "1" || v === "true" || v === "yes"
-}
-
-function envStr(name: string): string | null {
-  const v = process.env[name]?.trim()
+function envStr(env: NodeJS.ProcessEnv, name: string): string | null {
+  const v = env[name]?.trim()
   return v ? v : null
 }
 
-export function loadConfig(): Config {
+export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return {
-    readOnly: envFlag("GSC_READ_ONLY"),
-    /* Defaults to allowing destructive writes. A server where every write needs
-       a flag teaches the user to set the flag once and forget it, which looks
-       like a safeguard while being permanently off. The per-tool `confirm`
-       gate is the real speed bump; this switch is for unattended agents. */
-    allowDestructive: process.env.GSC_ALLOW_DESTRUCTIVE?.trim() === "0" ? false : true,
-    auditLog: envStr("GSC_AUDIT_LOG") ? expandHome(envStr("GSC_AUDIT_LOG")!) : null,
-    clientId: envStr("GSC_CLIENT_ID"),
-    clientSecret: envStr("GSC_CLIENT_SECRET"),
-    serviceAccountKeyPath: envStr("GSC_SERVICE_ACCOUNT_KEY") ? expandHome(envStr("GSC_SERVICE_ACCOUNT_KEY")!) : null,
-    serviceAccountKeyJson: envStr("GSC_SERVICE_ACCOUNT_KEY_JSON"),
-    staticAccessToken: envStr("GSC_ACCESS_TOKEN"),
+    clientId: envStr(env, "GSC_CLIENT_ID"),
+    clientSecret: envStr(env, "GSC_CLIENT_SECRET"),
+    serviceAccountKeyPath: envStr(env, "GSC_SERVICE_ACCOUNT_KEY") ? expandHome(envStr(env, "GSC_SERVICE_ACCOUNT_KEY")!) : null,
+    serviceAccountKeyJson: envStr(env, "GSC_SERVICE_ACCOUNT_KEY_JSON"),
+    staticAccessToken: envStr(env, "GSC_ACCESS_TOKEN"),
   }
 }
 

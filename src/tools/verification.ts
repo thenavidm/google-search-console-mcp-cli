@@ -1,7 +1,6 @@
 import { z } from "zod"
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { request, VERIFY_BASE } from "../api/client.js"
-import { ACCOUNT, tool, type ToolContext } from "./shared.js"
+import { ACCOUNT, tool, type ToolContext, type ToolRegistrar } from "./shared.js"
 
 /**
  * Site Verification is a separate Google API from Search Console, and the
@@ -17,7 +16,7 @@ const METHOD = z
   .enum(["DNS_TXT", "META", "FILE"])
   .describe("DNS_TXT is the only method a domain property accepts. A URL-prefix property can also use META or FILE.")
 
-export function registerVerificationTools(server: McpServer, ctx: ToolContext): void {
+export function registerVerificationTools(server: ToolRegistrar, ctx: ToolContext): void {
   tool(server, ctx, {
     name: "get_verification_token",
     kind: "read",

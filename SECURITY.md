@@ -45,7 +45,8 @@ do that at [myaccount.google.com/permissions](https://myaccount.google.com/permi
 
 `--http` binds `127.0.0.1` by default. Binding any other interface requires
 `GSC_HTTP_TOKEN` and the server refuses to start without it, because anything
-that can reach the port inherits everything listed above.
+that can reach the port inherits everything listed above. A page from another
+site is refused unless `GSC_HTTP_ALLOWED_ORIGINS` lists it.
 
 The token is compared on every request. Put TLS in front of it: the server
 speaks plain HTTP and a bearer token over plain HTTP on a public network is
@@ -84,7 +85,7 @@ close the fence early neutralised. And the server instructions say the rule
 before the first tool result arrives.
 
 For an agent running unattended, particularly against properties you do not
-control, `GSC_READ_ONLY=1` is the real defence. It unregisters every write tool,
+control, `GSC_READ_ONLY=1` is the real defence. It leaves every write tool off the list,
 so there is nothing for an injected instruction to reach.
 
 ## Good-faith research

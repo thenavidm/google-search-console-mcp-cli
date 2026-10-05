@@ -14,7 +14,7 @@ One install gives you both surfaces, the same 19 tools under the same names, fro
 
 Give any AI agent real access to what Google Search actually recorded about your sites. Queries, pages, impressions, rankings, indexing, sitemaps, from Claude Code, Claude Desktop, claude.ai, Cursor, Codex, or any MCP client.
 
-Built by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme).
+Built by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme). Built on [Slipway](https://github.com/thenavidm/slipway), which turns one definition of each tool into the MCP server and the CLI.
 
 <img src="https://cdn.navid.media/repos/google-search-console-mcp.gif?v=2" alt="Claude Code using the Google Search Console MCP server" width="520">
 
@@ -33,10 +33,11 @@ google-search-console-cli top-queries --site sc-domain:example.com --limit 10
 google-search-console-cli striking-distance --site sc-domain:example.com
 google-search-console-cli top-pages --site sc-domain:example.com --json --select rows.page,rows.clicks
 google-search-console-cli delete-sitemap --site sc-domain:example.com --sitemap-url https://example.com/old.xml --confirm
+google-search-console-cli which submit a sitemap            # find the command for a task
 google-search-console-cli <command> --help                  # what any command takes
 ```
 
-`--confirm` is the shell spelling of the confirmation deleting a property or a sitemap needs. `--json` gives JSON, `--compact` puts it on one line, `--select` keeps only the fields you name, and `--agent` turns on all of it for a script. Exit codes are 0 ok, 2 usage or a refused write, 3 not found, 4 auth, 5 API, 7 rate limited and 10 nothing configured, so a script branches on the number.
+`--confirm` is the shell spelling of the confirmation deleting a property or a sitemap needs. `--json` gives JSON, `--compact` puts it on one line, `--select` keeps only the fields you name, and `--agent` turns on all of it for a script. Exit codes are 0 ok, 1 unexpected, 2 usage or a refused write, 3 not found, 4 auth, 5 API, 7 rate limited and 10 nothing configured, so a script branches on the number.
 
 `google-search-console-cli schema <command>` prints the exact JSON Schema an MCP client
 receives for that tool.
@@ -60,10 +61,10 @@ difference is when the model pays for them. Measured in Claude Code:
 
 | | MCP server | CLI |
 |---|---|---|
-| Every message, with every tool loaded | 9,200 tokens | nothing |
-| Every message, Claude Code's default | 850 tokens | nothing |
-| When Search Console comes up | nothing more, or the tools it picks | 3,200 tokens for `SKILL.md`, once |
-| 20 messages with Search Console in 1, every tool loaded | 184,000 tokens | 3,200 tokens |
+| Every message, with every tool loaded | 8,700 tokens | nothing |
+| Every message, Claude Code's default | 840 tokens | nothing |
+| When Search Console comes up | nothing more, or the tools it picks | 3,100 tokens for `SKILL.md`, once |
+| 20 messages with Search Console in 1, every tool loaded | 174,000 tokens | 3,100 tokens |
 
 Claude Code's [tool search](https://code.claude.com/docs/en/mcp#scale-with-mcp-tool-search)
 is on by default: it sends only the tool names and the server instructions,
@@ -76,11 +77,28 @@ To spend less, turn the server off when you are not using it, which in Claude
 Code is the `/mcp` panel. `GSC_READ_ONLY=1` takes the 5 write tools off the list, leaving 14.
 Or install the CLI and add the server on the days it earns its place.
 
-Measured on 2026-09-27 with Claude Code 2.1.257 on Claude Opus 5: one
-short prompt with and without the server connected, once with
-`ENABLE_TOOL_SEARCH=false` and once with the default, the difference read
-from the API's own usage figures. `SKILL.md` was measured the same way. Other
-apps and models count tokens a little differently.
+Measured on 2026-10-05 against 0.2.2, with Claude Code 2.1.286 on Claude Opus
+5.5 (one short prompt with and without the server connected, once with
+`ENABLE_TOOL_SEARCH=false` and once with the default, the difference read from
+the API's own usage figures; `SKILL.md` the same way) and Codex 0.159.3 on
+gpt-6.1-sol:
+
+| Cost | 0.2.2 | 0.3.0 |
+| --- | --- | --- |
+| Claude Code, every tool loaded, every message | 9,208 | 8,686 |
+| Claude Code's default, tool search, every message | 841 | 839 |
+| `SKILL.md`, read once | 3,142 | 3,140 |
+| Codex over the CLI, one task, median of five | 83,685 | 62,056 |
+| Codex over MCP, the same task, median of five | 48,548 | 48,544 |
+
+The task was "find the command for the queries a site ranks just off page one,
+and the flags it requires". Every tool loaded costs less because each tool no
+longer repeats `$schema` and an `execution` block. Over the CLI, every 0.2.2 run
+read the general help, the command list and the command's help, three requests
+that each carry the conversation so far, and every 0.3.0 run read the general
+help and asked `which`, which answered with the command's help: two. Other apps
+and models count tokens a little differently, and tool-list characters divided
+by four are not API usage.
 
 ## Contents
 
@@ -91,8 +109,8 @@ apps and models count tokens a little differently.
 | 3 | [Setup](#3-setup-) | Getting a Google credential |
 | 4 | [Connect your client](#4-connect-your-client-) | Every client, copy and paste |
 | 5 | [Check it worked](#5-check-it-worked-) | `doctor` |
-| 6 | [Tools](#6-tools-) | All 19 |
-| 7 | [Working safely](#7-working-safely-) | What is guarded, what is not |
+| 6 | [Tools](#6-tools-%EF%B8%8F) | All 19 |
+| 7 | [Working safely](#7-working-safely-%EF%B8%8F) | What is guarded, what is not |
 | 8 | [What Search Console actually does](#8-what-search-console-actually-does-) | The things that surprise people |
 | 9 | [Your data](#9-your-data-) | What is stored, and where |
 | 10 | [Running it on a server](#10-running-it-on-a-server-) | For claude.ai |
@@ -115,7 +133,7 @@ The first one is the point. "What changed" is the question anyone actually has, 
 
 ## 2. Quick install ⚡
 
-Node 20 or newer. Nothing else.
+Node 22 or newer. Nothing else.
 
 ```bash
 npx -y @thenavidm/google-search-console-mcp-cli@latest --version
@@ -280,19 +298,19 @@ npx -y @thenavidm/google-search-console-mcp-cli@latest doctor
 It reports the Node version, which credential is in use, whether a token can actually be minted, how many properties that account reaches, whether verification is available, and which safety switches are on.
 
 ```
-✓ Signed-in accounts
-    you@example.com (stored at ~/.google-search-console-mcp/tokens.json)
-✓ Token
-    Got a live token for you@example.com via oauth.
-✓ Search Console access
-    4 properties, 4 writable. First: sc-domain:example.com
+  ✓ Signed in          you@example.com, stored at ~/.google-search-console-mcp/tokens.json
+  ✓ OAuth client       GSC_CLIENT_ID and GSC_CLIENT_SECRET are set, so tokens refresh automatically
+  ✓ Token              live for you@example.com, by oauth
+  ✓ Search Console     4 properties, 4 writable. First: sc-domain:example.com
 ```
+
+It exits 0 when everything works, 1 when a check fails, and 10 when nothing is signed in.
 
 Two things account for almost every failure, and `doctor` names both: zero properties means you signed in with the wrong Google account, and a refresh failure a week after setup means the OAuth app is still in Testing.
 
 ## 6. Tools 🛠️
 
-Nineteen tools. The five marked ● are writes and disappear under `GSC_READ_ONLY=1`.
+Nineteen tools. The five marked ● are writes and disappear under `GSC_READ_ONLY=1`; the two deletes also disappear under `GSC_ALLOW_DESTRUCTIVE=0`.
 
 ### Search performance
 
@@ -320,7 +338,7 @@ Nineteen tools. The five marked ● are writes and disappear under `GSC_READ_ONL
 | `list_sitemaps` | Every submitted sitemap, when Google last read it, URL counts, errors |
 | `get_sitemap` | Details for one |
 | ● `submit_sitemap` | Submit or resubmit. The only recrawl signal the API can send |
-| ● `delete_sitemap` | Stop tracking one. Needs `confirm: true` |
+| ● `delete_sitemap` | Stop tracking one. Needs confirming |
 
 ### Properties
 
@@ -329,7 +347,7 @@ Nineteen tools. The five marked ● are writes and disappear under `GSC_READ_ONL
 | `list_sites` | Every property this account reaches, with permission level. Start here |
 | `get_site` | One property and the permission held on it |
 | ● `add_site` | Register a new property, unverified |
-| ● `delete_site` | Remove a property. Needs `confirm: true` |
+| ● `delete_site` | Remove a property. Needs confirming |
 | `list_accounts` | Which Google accounts are signed in, and which is the default |
 
 ### Verification
@@ -348,13 +366,13 @@ Writes work by default. Publishing a sitemap is the point of having the tool, an
 
 Three mechanisms do the job instead.
 
-**`confirm: true` on the two irreversible tools.** `delete_site` and `delete_sitemap`. Not on `submit_sitemap` or `add_site`: both are trivially undone, and asking for confirmation on everything trains the reflex that defeats asking at all.
+**Confirmation on the two irreversible tools,** `delete_site` and `delete_sitemap`. Over MCP a person approves each call: Claude Code (2.1.246 and later) shows its own prompt, and a client that can show forms asks with an approval form whose one box starts unticked. Where a client can do neither, the model's `confirm: true` still counts, and `GSC_CONFIRM=model` makes it enough everywhere. In a terminal the flag is `--confirm`, which `--agent` never adds. Not on `submit_sitemap` or `add_site`: both are trivially undone, and asking for confirmation on everything trains the reflex that defeats asking at all.
 
-**`GSC_READ_ONLY=1` removes writes entirely.** They are not registered, so they never appear in the tool list. A model cannot call a tool it cannot see. This is the right setting for an agent working unattended.
+**`GSC_READ_ONLY=1` removes writes entirely.** They are left off the tool list, and refused if called anyway. A model cannot call a tool it cannot see. This is the right setting for an agent working unattended.
 
-**`GSC_ALLOW_DESTRUCTIVE=0`** keeps `submit_sitemap` and `add_site` while dropping the two deletes.
+**`GSC_ALLOW_DESTRUCTIVE=0`** keeps `submit_sitemap` and `add_site` while dropping the two deletes from the list.
 
-**`GSC_AUDIT_LOG=<path>`** writes one JSON line per attempted write, allowed and failed alike.
+**`GSC_AUDIT_LOG=<path>`** writes one JSON line per attempted write, allowed and refused alike, with who approved it, then whether it was done or failed. Arguments are not logged, so no token reaches it.
 
 Every tool carries MCP annotations so your client can decide what to auto-approve:
 
@@ -395,9 +413,43 @@ There is no backend. Nothing is sent anywhere except Google.
 | Refresh token, one per signed-in account | `~/.google-search-console-mcp/tokens.json`, mode `600` |
 | Audit log, only if you set `GSC_AUDIT_LOG` | Wherever you point it |
 
-`GSC_TOKEN_STORE` moves the token file. `logout <email>` deletes an entry from it, and [myaccount.google.com/permissions](https://myaccount.google.com/permissions) revokes Google's side, which is the half that actually matters.
+`GSC_TOKEN_STORE` moves the token file. `logout <email>` deletes an entry from it, `accounts` lists them, and [myaccount.google.com/permissions](https://myaccount.google.com/permissions) revokes Google's side, which is the half that actually matters.
 
 Search Console data is read on demand and never cached to disk.
+
+### Settings
+
+The program reads the environment directly. It does not load `.env` files.
+
+**Credentials**, in the order they are tried
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `GSC_ACCESS_TOKEN` | Empty | A token minted elsewhere, such as by `gcloud auth print-access-token`. Never refreshed |
+| `GSC_SERVICE_ACCOUNT_KEY` | Empty | Path to a service account JSON key, for machines with no browser |
+| `GSC_SERVICE_ACCOUNT_KEY_JSON` | Empty | The same key inline, raw or base64 |
+| `GSC_CLIENT_ID`, `GSC_CLIENT_SECRET` | Empty | A Desktop OAuth client, for `login` and for refreshing a stored sign-in |
+| `GSC_TOKEN_STORE` | `~/.google-search-console-mcp/tokens.json` | Where sign-ins are kept |
+| `GSC_SCOPES` | `webmasters` and `siteverification` | The scopes `login` asks for |
+
+**Safety**
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `GSC_READ_ONLY` | Off | `1` or `true` hides every write |
+| `GSC_ALLOW_DESTRUCTIVE` | On | `0` drops the two deletes from the list |
+| `GSC_CONFIRM` | `human` | `model` lets `confirm: true` alone approve over MCP, for an agent with no person to ask |
+| `GSC_AUDIT_LOG` | Empty | Append guard decisions to this local path |
+
+**Tuning**
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `GSC_SURFACE` | `full` | `search` lists three tools that find, describe and run the rest |
+| `GSC_TOOL_TIMEOUT_MS` | None | Give up on any tool after this long |
+| `GSC_HTTP_PORT`, `GSC_HTTP_HOST`, `GSC_HTTP_TOKEN` | 8000, 127.0.0.1, none | For `--http`; any host but 127.0.0.1 needs the bearer token. `--port`, `--host` and `PORT` still work |
+| `GSC_HTTP_ALLOWED_ORIGINS` | None | Comma-separated browser origins allowed to call `--http`; a page from any other site is refused |
+| `GSC_DEBUG` | `0` | `1` prints debug lines on stderr |
 
 ## 10. Running it on a server 🌐
 
@@ -414,7 +466,7 @@ export GSC_HTTP_TOKEN="$(openssl rand -hex 32)"
 npx -y @thenavidm/google-search-console-mcp-cli@latest --http --host 0.0.0.0 --port 8000
 ```
 
-The refusal is deliberate. Whatever can reach that port can read your site's entire search history and delete its properties.
+The refusal is deliberate. Whatever can reach that port can read your site's entire search history and delete its properties. A page from another site is refused too, unless `GSC_HTTP_ALLOWED_ORIGINS` lists it.
 
 Then in claude.ai: **Customize**, **Connectors**, **+**, **Add custom connector**, and paste the HTTPS URL ending in `/mcp`. On Team and Enterprise an owner adds it under **Organization settings**, **Connectors** first.
 
@@ -434,7 +486,7 @@ Start with `doctor`. It checks each failure mode separately and names the fix. A
 | Empty results for the last few days | The two to three day data lag. Use `data_state: "all"` for partial days. |
 | Fewer clicks per query than the site total | Expected. Google withholds rare queries. |
 | Claude Desktop cannot find `npx` | It does not inherit your shell PATH. Use the absolute path from `which npx`. |
-| Write tools missing from the tool list | `GSC_READ_ONLY=1` is set, which unregisters them. |
+| Write tools missing from the tool list | `GSC_READ_ONLY=1` is set, which leaves them off. `GSC_ALLOW_DESTRUCTIVE=0` does the same to the two deletes. |
 
 ## 12. FAQ ❓
 
@@ -502,7 +554,7 @@ Everything else it does faster: checking 30 URLs after a launch is 30 clicks in 
 <details>
 <summary><b>Can it delete something by accident?</b></summary>
 
-Two tools can delete something. `delete_site` removes a property from your account, and `delete_sitemap` stops Search Console tracking a sitemap. Both refuse to run without `confirm: true`.
+Two tools can delete something. `delete_site` removes a property from your account, and `delete_sitemap` stops Search Console tracking a sitemap. Both refuse to run until confirmed: over MCP a person approves each call in the client, and in a terminal it takes `--confirm`.
 
 Neither touches your website, and neither removes anything from Google's index. `delete_site` loses your account's access to that property's history until it is re-added and re-verified.
 
@@ -570,9 +622,9 @@ If this is useful, star the repo and come say hi on [X](https://x.com/thenavidm)
 
 | Package | License | Why |
 |---|---|---|
-| [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) | MIT | The MCP protocol implementation |
+| [Slipway](https://github.com/thenavidm/slipway) | Apache-2.0 | The MCP server, the CLI and the HTTP transport from one definition of each tool |
+| [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) | Apache-2.0 | The MCP protocol and its transports, through Slipway |
 | [zod](https://github.com/colinhacks/zod) | MIT | Tool input schemas |
-| [express](https://github.com/expressjs/express) | MIT | The HTTP transport |
 
 ## License
 

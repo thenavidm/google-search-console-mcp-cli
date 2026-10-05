@@ -20,12 +20,12 @@ faked fetch every test goes through.
 
 | | |
 |---|---|
-| `src/index.ts` | argv parsing and transport selection, nothing else |
-| `src/server.ts` | assembles the server and holds the instructions string |
-| `src/config.ts` | every environment variable is read here and nowhere else |
+| `src/index.ts` | starts the app; turns 0.2's `--host` and `PORT` into the settings Slipway reads |
+| `src/app.ts` | the app Slipway serves: settings, `doctor`, `login`, `logout`, `accounts` |
+| `src/instructions.ts` | the instructions string |
+| `src/config.ts` | the settings every tool reads |
 | `src/auth.ts` | the three credential routes, the loopback login, refresh |
-| `src/safety.ts` | annotations, registration gating, audit log, injection framing |
-| `src/doctor.ts` | one check per way this can be broken |
+| `src/safety.ts` | what a tool can change, and injection framing |
 | `src/api/client.ts` | the HTTP layer, error mapping, property normalization |
 | `src/tools/` | one module per group, grouped by what they reach |
 | `src/format/rows.ts` | shaping API output for a model |
@@ -36,9 +36,10 @@ faked fetch every test goes through.
 `confirm`. Adding `confirm` to `submit_sitemap` would teach a model to pass it
 reflexively, which is worse than not having it.
 
-**Gating happens at registration, not at call time.** `shouldRegister` decides
-whether a tool exists. An error saying "writes are disabled" is an invitation
-to try a different tool; an absent tool is not.
+**Gating hides, rather than refuses.** Slipway leaves writes off the list
+under `GSC_READ_ONLY`, and the two deletes under `GSC_ALLOW_DESTRUCTIVE=0`. An
+error saying "writes are disabled" is an invitation to try a different tool; an
+absent tool is not.
 
 **Property strings are normalized in `api/client.ts`, once.** Do not add
 per-tool normalization.
@@ -53,10 +54,11 @@ one.
 
 ## Adding a tool
 
-Register it through the `tool()` helper in `src/tools/shared.ts` rather than
-calling `server.registerTool` directly. The helper handles the account argument,
-read-only gating, annotations and the audit log, and skipping it means a tool
-that ignores `GSC_READ_ONLY`.
+Register it through the `tool()` helper in `src/tools/shared.ts`.
+`src/tools/kit.ts` turns each spec into a Slipway tool: it resolves the token
+for the account a call names, and Slipway applies read-only, confirmation,
+annotations and the audit log from the `kind`. A confirmed tool needs a
+consequence in `CONSEQUENCES` there, in the words its refusal should say.
 
 Pick the `kind` honestly. `read` for anything that changes nothing,
 `destructive` only for what cannot be undone.

@@ -12,13 +12,13 @@ set -eu
 PKG="@thenavidm/google-search-console-mcp-cli@latest"
 
 if ! command -v node >/dev/null 2>&1; then
-  echo "Node 20 or newer is required. https://nodejs.org" >&2
+  echo "Node 22 or newer is required. https://nodejs.org" >&2
   exit 1
 fi
 
 MAJOR=$(node -p "process.versions.node.split('.')[0]")
-if [ "$MAJOR" -lt 20 ]; then
-  echo "Node 20 or newer is required, found $(node -v)." >&2
+if [ "$MAJOR" -lt 22 ]; then
+  echo "Node 22 or newer is required, found $(node -v)." >&2
   exit 1
 fi
 

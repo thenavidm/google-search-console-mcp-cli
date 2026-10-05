@@ -1,10 +1,9 @@
 import { z } from "zod"
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { request, normalizeSite, SC_BASE } from "../api/client.js"
-import { ACCOUNT, SITE, tool, type ToolContext } from "./shared.js"
+import { ACCOUNT, SITE, tool, type ToolContext, type ToolRegistrar } from "./shared.js"
 import { frameUntrusted } from "../safety.js"
 
-export function registerInspectTools(server: McpServer, ctx: ToolContext): void {
+export function registerInspectTools(server: ToolRegistrar, ctx: ToolContext): void {
   tool(server, ctx, {
     name: "inspect_url",
     kind: "read",

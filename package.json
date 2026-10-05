@@ -1,6 +1,6 @@
 {
   "name": "@thenavidm/google-search-console-mcp-cli",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Google Search Console MCP server and CLI for Claude Code, Codex and AI agents. 19 tools for search analytics, URL inspection, sitemaps and property verification.",
   "type": "module",
   "bin": {
@@ -16,7 +16,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "tsc",
@@ -50,13 +50,11 @@
   },
   "homepage": "https://github.com/thenavidm/google-search-console-mcp-cli",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
-    "express": "^5.1.0",
+    "@thenavidm/slipway": "^0.1.20",
     "zod": "^4.5.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
     "eslint": "^10.9.1",
     "typescript": "^5.7.2",

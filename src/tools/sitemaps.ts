@@ -1,9 +1,8 @@
 import { z } from "zod"
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { request, normalizeSite, seg, WMX_BASE } from "../api/client.js"
-import { ACCOUNT, SITE, tool, type ToolContext } from "./shared.js"
+import { ACCOUNT, SITE, tool, type ToolContext, type ToolRegistrar } from "./shared.js"
 
-export function registerSitemapTools(server: McpServer, ctx: ToolContext): void {
+export function registerSitemapTools(server: ToolRegistrar, ctx: ToolContext): void {
   tool(server, ctx, {
     name: "list_sitemaps",
     kind: "read",
@@ -61,11 +60,9 @@ export function registerSitemapTools(server: McpServer, ctx: ToolContext): void 
     schema: {
       site: SITE,
       sitemap_url: z.string().describe("Full URL of the sitemap to stop tracking."),
-      confirm: z.boolean().default(false).describe("Set true to proceed. The submission history for this sitemap is not recoverable."),
       account: ACCOUNT,
     },
-    run: async ({ site, sitemap_url, confirm }, token) => {
-      if (!confirm) throw new Error("Not deleting. Call again with confirm: true once you are sure this is the right sitemap.")
+    run: async ({ site, sitemap_url }, token) => {
       await request(token, `${WMX_BASE}/sites/${seg(normalizeSite(site))}/sitemaps/${seg(sitemap_url)}`, { method: "DELETE" })
       return { deleted: sitemap_url, site: normalizeSite(site) }
     },

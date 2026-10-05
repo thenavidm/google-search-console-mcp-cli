@@ -1,8 +1,7 @@
 import { z } from "zod"
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { request, normalizeSite, seg, WMX_BASE } from "../api/client.js"
 import { labelRows, isoDaysAgo, totals, DATA_LAG_DAYS, type RawRow } from "../format/rows.js"
-import { ACCOUNT, SITE, tool, type ToolContext } from "./shared.js"
+import { ACCOUNT, SITE, tool, type ToolContext, type ToolRegistrar } from "./shared.js"
 import { frameUntrusted } from "../safety.js"
 
 const DIMENSION = z.enum(["query", "page", "country", "device", "searchAppearance", "date", "hour"])
@@ -38,7 +37,7 @@ function filterGroups(filters: z.infer<typeof FILTER>[] | undefined) {
   return [{ groupType: "and", filters }]
 }
 
-export function registerAnalyticsTools(server: McpServer, ctx: ToolContext): void {
+export function registerAnalyticsTools(server: ToolRegistrar, ctx: ToolContext): void {
   tool(server, ctx, {
     name: "query_search_analytics",
     kind: "read",

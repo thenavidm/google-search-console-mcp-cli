@@ -14,16 +14,13 @@ metadata:
 
 # Google Search Console
 
-Operating notes for the tools in this server. The README teaches a human to
-install it; this teaches you to get right answers out of it.
-
 
 ## Before you run anything
 
 If the MCP server is connected, use the tools and ignore this section.
 
-Otherwise this skill drives the `google-search-console-cli` binary, and you must confirm it is
-there first:
+Otherwise this skill drives the `google-search-console-cli` binary. Confirm it is there
+first:
 
 ```bash
 google-search-console-cli --version
@@ -41,7 +38,7 @@ If `--version` still reports command not found, the install directory is not on
 
 ## Finding a command
 
-The CLI describes itself, so nothing here lists every tool and goes stale:
+The CLI describes itself:
 
 ```bash
 google-search-console-cli                    # every command, one line each
@@ -50,7 +47,7 @@ google-search-console-cli schema <command>   # the exact JSON Schema an MCP clie
 ```
 
 The command is the tool name with dashes, and the underscore spelling also
-works. `--agent` is JSON, compact, no prompts and no colour in one flag, and
+works. `--agent` is JSON, compact, no prompts and no color in one flag, and
 `--select a,b.c` keeps only the fields you name.
 
 ```bash
@@ -63,12 +60,13 @@ google-search-console-cli striking-distance --site sc-domain:example.com --agent
 | Code | Meaning |
 |---|---|
 | 0 | Success |
-| 2 | Usage: a missing or wrong argument, an unknown command, or a write refused for want of `--confirm` |
+| 1 | Unexpected error |
+| 2 | Usage: a missing or wrong argument, an unknown command, a request Google rejected, or a write refused for want of `--confirm` |
 | 3 | Not found |
 | 4 | Authentication: a credential was rejected or has expired |
 | 5 | Upstream failure |
 | 7 | Rate limited, wait and retry |
-| 10 | Nothing configured yet |
+| 10 | Nothing signed in yet, or no signed-in account matches the one named |
 
 Branch on these rather than reading the message.
 
@@ -169,9 +167,9 @@ performance across two URLs.
 ## Writes
 
 `submit_sitemap` and `add_site` run without ceremony. `delete_site` and
-`delete_sitemap` need `confirm: true`, and the description says what is lost.
-Do not pass `confirm` speculatively; pass it when the user has actually asked
-for that deletion.
+`delete_sitemap` need confirming, and the description says what is lost: over
+MCP the user approves, or `confirm: true` where the app cannot ask, and
+`--confirm` in a terminal. Confirm only when the user asked for that deletion.
 
 Under `GSC_READ_ONLY=1` the write tools are not registered at all. If a user
 asks for a write and you cannot see the tool, that is why, and the fix is theirs
