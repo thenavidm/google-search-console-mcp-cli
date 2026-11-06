@@ -115,7 +115,7 @@ by four are not API usage.
 | 9 | [Your data](#9-your-data-) | What is stored, and where |
 | 10 | [Running it on a server](#10-running-it-on-a-server-) | For claude.ai |
 | 11 | [Troubleshooting](#11-troubleshooting-) | When something breaks |
-| 12 | [FAQ](#12-faq-) | Start here if you are new |
+| 12 | [FAQ](#12-faq) | Start here if you are new |
 
 ## 1. What you can ask it 💬
 
@@ -488,7 +488,7 @@ Start with `doctor`. It checks each failure mode separately and names the fix. A
 | Claude Desktop cannot find `npx` | It does not inherit your shell PATH. Use the absolute path from `which npx`. |
 | Write tools missing from the tool list | `GSC_READ_ONLY=1` is set, which leaves them off. `GSC_ALLOW_DESTRUCTIVE=0` does the same to the two deletes. |
 
-## 12. FAQ ❓
+## 12. FAQ
 
 <details>
 <summary><b>What is an MCP server?</b></summary>
@@ -602,21 +602,30 @@ Resubmitting a sitemap is the only recrawl signal available programmatically, wh
 
 Run into a problem or have a question? [Open an issue](https://github.com/thenavidm/google-search-console-mcp-cli/issues) and I will help.
 
-## About the author
+## Built by
 
-Navid Moazzez is a leading AI business strategist and the host of the AI Creator Summit, watched by 100,000+ creators. He helps creators and founders master AI and build their own AI Operating System (AI OS) to automate their business and life. He creates useful free tools, MCP servers and CLIs that creators and founders can use in their own workflows.
+<table>
+<tr>
+<td width="150" align="center" valign="top"><h3><a href="https://navid.me"><img src="https://cdn.navid.me/navid-moazzez.jpg" width="120" height="120" alt="Navid Moazzez"></a></h3></td>
+<td valign="top">
 
-**Links**
+### Navid Moazzez
 
-- Personal website: [navid.me](https://navid.me?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme)
-- Link in bio: [navid.bio](https://navid.bio?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme)
-- Navid Media: [navid.media](https://navid.media?utm_source=github&utm_medium=referral&utm_campaign=google-search-console-mcp-cli&utm_content=readme)
-- YouTube: [@thenavidm](https://youtube.com/@thenavidm?sub_confirmation=1) and [@thenavidai](https://youtube.com/@thenavidai?sub_confirmation=1)
-- X: [@thenavidm](https://x.com/thenavidm)
-- Instagram: [@thenavidm](https://instagram.com/thenavidm)
-- LinkedIn: [thenavidm](https://linkedin.com/in/thenavidm)
+Navid Moazzez is a leading AI business strategist, and the host of the AI Creator Summit, watched by 100,000+ creators. He helps creators and founders master AI and build their own AI Operating System (AI OS) to automate their business and life. He creates useful free tools, MCP servers and CLIs that creators and founders can use in their own workflows.
 
-If this is useful, star the repo and come say hi on [X](https://x.com/thenavidm).
+<a href="https://navid.me"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.navid.me/repos/about-navid-me-dark.svg"><img src="https://cdn.navid.me/repos/about-navid-me-light.svg" alt="navid.me" height="30"></picture></a>
+<a href="https://navid.bio"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.navid.me/repos/about-navid-bio-dark.svg"><img src="https://cdn.navid.me/repos/about-navid-bio-light.svg" alt="navid.bio" height="30"></picture></a>
+<a href="https://navid.media"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.navid.me/repos/about-navid-media-dark.svg"><img src="https://cdn.navid.me/repos/about-navid-media-light.svg" alt="Navid Media" height="30"></picture></a>
+<a href="https://youtube.com/@thenavidm?sub_confirmation=1"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.navid.me/repos/about-youtube-dark.svg"><img src="https://cdn.navid.me/repos/about-youtube-light.svg" alt="YouTube" height="30"></picture></a>
+<a href="https://youtube.com/@thenavidai?sub_confirmation=1"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.navid.me/repos/about-youtube-ai-dark.svg"><img src="https://cdn.navid.me/repos/about-youtube-ai-light.svg" alt="AI channel" height="30"></picture></a>
+<a href="https://x.com/thenavidm"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.navid.me/repos/about-x-dark.svg"><img src="https://cdn.navid.me/repos/about-x-light.svg" alt="X" height="30"></picture></a>
+<a href="https://instagram.com/thenavidm"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.navid.me/repos/about-instagram-dark.svg"><img src="https://cdn.navid.me/repos/about-instagram-light.svg" alt="Instagram" height="30"></picture></a>
+<a href="https://linkedin.com/in/thenavidm"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.navid.me/repos/about-linkedin-dark.svg"><img src="https://cdn.navid.me/repos/about-linkedin-light.svg" alt="LinkedIn" height="30"></picture></a>
+<a href="https://github.com/thenavidm"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.navid.me/repos/about-github-dark.svg"><img src="https://cdn.navid.me/repos/about-github-light.svg" alt="More repos" height="30"></picture></a>
+
+</td>
+</tr>
+</table>
 
 ## Dependencies
 
